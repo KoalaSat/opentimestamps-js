@@ -1,0 +1,43 @@
+{
+  "name": "opentimestamps",
+  "version": "1.0.0",
+  "main": "index.js",
+  "directories": {
+    "example": "examples",
+    "test": "test"
+  },
+  "scripts": {
+    "test": "echo \"Error: no test specified\" && exit 1"
+  },
+  "repository": {
+    "type": "git",
+    "url": "git+https://github.com/BlockchainCC/opentimestamps-js.git"
+  },
+  "author": "BlockchainCC",
+  "license": "ISC",
+  "bugs": {
+    "url": "https://github.com/BlockchainCC/opentimestamps-js/issues"
+  },
+  "homepage": "https://github.com/BlockchainCC/opentimestamps-js#readme",
+    "dependencies": {
+    "bytebuffer": "^5.0.1",
+    "crypto": "0.0.3",
+    "fs": "0.0.1-security",
+    "promise": "^7.1.1",
+    "properties": "^1.2.1",
+    "randomstring": "^1.1.5",
+    "request": "^2.79.0",
+    "request-promise": "^4.1.1"
+  },
+  "description": "JS Porting of OpenTimestamps",
+  "devDependencies": {
+    "browserify": "^14.0.0",
+    "faucet": "0.0.1",
+    "jsdoc": "^3.4.3",
+    "tap": "~8.0.1",
+    "tap-parser": "~3.0.4",
+    "tape": "^4.6.3",
+    "tape-run": "2.1.6",
+    "xo": "^0.17.0"
+  },
+}
