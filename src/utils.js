@@ -8,7 +8,6 @@
  */
 
 const crypto = require('crypto-browserify');
-const fs = require('fs');
 
 /**
  * Convert a hex string to a byte array
@@ -147,13 +146,7 @@ exports.softFail = function (promise) {
  */
 exports.readFilePromise = function (filename, mode) {
   return new Promise((resolve, reject) => {
-    fs.readFile(filename, mode, (err, buffer) => {
-      if (err) {
-        reject(err);
-      } else {
-        resolve(buffer);
-      }
-    });
+    console.log('READ FILE ERROR!')
   });
 };
 

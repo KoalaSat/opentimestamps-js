@@ -19,13 +19,13 @@
     "url": "https://github.com/BlockchainCC/opentimestamps-js/issues"
   },
   "homepage": "https://github.com/BlockchainCC/opentimestamps-js#readme",
-    "dependencies": {
+  "dependencies": {
     "bytebuffer": "^5.0.1",
     "crypto-browserify": "^3.12.0",
-    "fs": "0.0.1-security",
     "promise": "^7.1.1",
     "properties": "^1.2.1",
     "randomstring": "^1.1.5",
+    "react-native-fs": "^2.20.0",
     "request": "^2.79.0",
     "request-promise": "^4.1.1"
   },
