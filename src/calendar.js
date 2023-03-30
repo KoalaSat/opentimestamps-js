@@ -7,7 +7,7 @@
  * @license LPGL3
  */
 
-const requestPromise = require('request-promise');
+const axios = require('axios');
 const Promise = require('promise');
 const Utils = require('./utils.js');
 const Context = require('./context.js');
@@ -45,35 +45,41 @@ class RemoteCalendar {
   submit(digest) {
     // console.log('digest ', Utils.bytesToHex(digest));
 
-    const options = {
-      url: this.url + '/digest',
-      method: 'POST',
-      headers: {
-        Accept: 'application/vnd.opentimestamps.v1',
-        'User-Agent': 'javascript-opentimestamps',
-        'Content-Type': 'application/x-www-form-urlencoded'
-      },
-      encoding: null,
-      body: new Buffer(digest)
-    };
+    // const options = {
+    //   url: this.url + '/digest',
+    //   method: 'POST',
+    //   headers: {
+    //     Accept: 'application/vnd.opentimestamps.v1',
+    //     'User-Agent': 'javascript-opentimestamps',
+    //     'Content-Type': 'application/x-www-form-urlencoded'
+    //   },
+    //   encoding: null,
+    //   body: new Buffer(digest)
+    // };
 
     return new Promise((resolve, reject) => {
-      requestPromise(options)
-              .then(body => {
-                // console.log('body ', body);
-                if (body.size > 10000) {
-                  console.error('Calendar response exceeded size limit');
-                  return;
-                }
+      axios.post(this.url + '/digest', new Buffer(digest), { 
+        headers: {
+          Accept: 'application/vnd.opentimestamps.v1',
+          'User-Agent': 'javascript-opentimestamps',
+          'Content-Type': 'application/x-www-form-urlencoded'
+        } 
+      })
+      .then(response => {
+        console.log(this.url + '/digest', new Buffer(digest), response.data);
+        if (response.data.lenght > 10000) {
+          console.error('Calendar response exceeded size limit');
+          return;
+        }
 
-                const ctx = new Context.StreamDeserialization(body);
-                const timestamp = Timestamp.deserialize(ctx, digest);
-                resolve(timestamp);
-              })
-              .catch(err => {
-                console.error('Calendar response error: ' + err);
-                reject();
-              });
+        const ctx = new Context.StreamDeserialization(response.data);
+        const timestamp = Timestamp.deserialize(ctx, digest);
+        resolve(timestamp);
+      })
+      .catch(err => {
+        console.error('Calendar response error: ' + err);
+        reject();
+      });
     });
   }
 
@@ -86,38 +92,45 @@ class RemoteCalendar {
   getTimestamp(commitment) {
     // console.error('commitment ', Utils.bytesToHex(commitment));
 
-    const options = {
-      url: this.url + '/timestamp/' + Utils.bytesToHex(commitment),
-      method: 'GET',
-      headers: {
-        Accept: 'application/vnd.opentimestamps.v1',
-        'User-Agent': 'javascript-opentimestamps',
-        'Content-Type': 'application/x-www-form-urlencoded'
-      },
-      encoding: null
-    };
+    // const options = {
+    //   url: this.url + '/timestamp/' + Utils.bytesToHex(commitment),
+    //   method: 'GET',
+    //   headers: {
+    //     Accept: 'application/vnd.opentimestamps.v1',
+    //     'User-Agent': 'javascript-opentimestamps',
+    //     'Content-Type': 'application/x-www-form-urlencoded'
+    //   },
+    //   encoding: null
+    // };
 
     return new Promise((resolve, reject) => {
-      requestPromise(options)
-          .then(body => {
-            // /console.log('body ', body);
-            if (body.size > 10000) {
-              console.error('Calendar response exceeded size limit');
-              return reject();
-            }
-            const ctx = new Context.StreamDeserialization(body);
 
-            const timestamp = Timestamp.deserialize(ctx, commitment);
-            return resolve(timestamp);
-          })
-          .catch(err => {
-            if (err.statusCode === 404) {
-              // console.error(err.response.body);
-            } else {
-              console.error('Calendar response error: ' + err);
-            }
-            return reject();
-          });
+      axios.get(this.url + '/timestamp/' + Utils.bytesToHex(commitment), { 
+        headers: {
+          Accept: 'application/vnd.opentimestamps.v1',
+          'User-Agent': 'javascript-opentimestamps',
+          'Content-Type': 'application/x-www-form-urlencoded'
+        } 
+      })
+      .then(response => {
+        console.log(this.url + '/timestamp/' + Utils.bytesToHex(commitment), response.data);
+        if (response.data.lenght > 10000) {
+          console.error('Calendar response exceeded size limit');
+          return reject();
+        }
+        const ctx = new Context.StreamDeserialization(response.data);
+
+        const timestamp = Timestamp.deserialize(ctx, commitment);
+        return resolve(timestamp);
+      })
+      .catch(err => {
+        if (err.statusCode === 404) {
+          // console.error(err.response.body);
+        } else {
+          console.error('Calendar response error: ' + err);
+        }
+        return reject();
+      });
     });
   }
 }

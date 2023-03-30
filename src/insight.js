@@ -7,7 +7,7 @@
  * @license LPGL3
  */
 
-const requestPromise = require('request-promise');
+const axios = require('axios');
 const Promise = require('promise');
 const Utils = require('./utils.js');
 
@@ -59,21 +59,27 @@ class Insight {
     };
 
     return new Promise((resolve, reject) => {
-      requestPromise(options)
-          .then(body => {
-            // console.log('body ', body);
-            if (body.size === 0) {
-              console.error('Insight response error body ');
-              reject();
-              return;
-            }
+      axios.get(this.urlBlockindex + '/' + height, { 
+        headers: {
+          Accept: 'application/json',
+          'User-Agent': 'javascript-opentimestamps',
+          'Content-Type': 'application/x-www-form-urlencoded'
+        } 
+      })
+      .then(response => {
+        console.log(this.urlBlockindex + '/' + height, response.data);
+        if (response.data.lenght === 0) {
+          console.error('Insight response error body ');
+          reject();
+          return;
+        }
 
-            resolve(body.blockHash);
-          })
-          .catch(err => {
-            console.error('Insight response error: ' + err);
-            reject();
-          });
+        resolve(response.data.blockHash);
+      })
+      .catch(err => {
+        console.error('Insight response error: ' + err);
+        reject();
+      });
     });
   }
 
@@ -96,20 +102,26 @@ class Insight {
     };
 
     return new Promise((resolve, reject) => {
-      requestPromise(options)
-          .then(body => {
-            // console.log('body ', body);
-            if (body.size === 0) {
-              console.error('Insight response error body ');
-              reject();
-              return;
-            }
-            resolve({merkleroot: body.merkleroot, time: body.time});
-          })
-          .catch(err => {
-            console.error('Insight response error: ' + err);
-            reject();
-          });
+      axios.get(this.urlBlock + '/' + hash, { 
+        headers: {
+          Accept: 'application/json',
+          'User-Agent': 'javascript-opentimestamps',
+          'Content-Type': 'application/x-www-form-urlencoded'
+        } 
+      })
+      .then(response => {
+        console.log(this.urlBlock + '/' + hash, response.data);
+        if (response.data.lenght === 0) {
+          console.error('Insight response error body ');
+          reject();
+          return;
+        }
+        resolve({merkleroot: response.data.merkleroot, time: response.data.time});
+      })
+      .catch(err => {
+        console.error('Insight response error: ' + err);
+        reject();
+      });
     });
   }
 }

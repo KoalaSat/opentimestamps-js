@@ -8,7 +8,7 @@
  */
 
 const properties = require('properties');
-const requestPromise = require('request-promise');
+const axios = require('axios');
 const Promise = require('promise');
 const Utils = require('./utils.js');
 
@@ -149,32 +149,37 @@ class BitcoinNode {
      * and {@link reject} if rejected.
      */
   callRPC(params) {
-    const options = {
-      url: this.urlString,
-      method: 'POST',
-      headers: {
-        Accept: 'application/json',
-        Authorization: 'Basic ' + this.authString,
-        'Content-Type': 'application/x-www-form-urlencoded'
-      },
-      json: true,
-      body: JSON.stringify(params)
-    };
+    // const options = {
+    //   url: this.urlString,
+    //   method: 'POST',
+    //   headers: {
+    //     Accept: 'application/json',
+    //     Authorization: 'Basic ' + this.authString,
+    //     'Content-Type': 'application/x-www-form-urlencoded'
+    //   },
+    //   json: true,
+    //   body: JSON.stringify(params)
+    // };
     return new Promise((resolve, reject) => {
-      requestPromise(options)
-                .then(body => {
-                    // console.log('body ', body);
-                  if (body.length === 0) {
-                    console.error('RPC response error body ');
-                    reject();
-                    return;
-                  }
-                  resolve(body.result);
-                })
-                .catch(err => {
-                  console.error('RPC response error: ' + err);
-                  reject(err);
-                });
+      axios.post(this.urlString, params, { 
+        headers: {
+          Accept: 'application/json',
+          Authorization: 'Basic ' + this.authString,
+          'Content-Type': 'application/x-www-form-urlencoded'
+        } 
+      }).then(response => {
+          console.log(this.urlString, response.data);
+        if (response.data.length === 0) {
+          console.error('RPC response error body ');
+          reject();
+          return;
+        }
+        resolve(response.data);
+      })
+      .catch(err => {
+        console.error('RPC response error: ' + err);
+        reject(err);
+      });
     });
   }
 }
