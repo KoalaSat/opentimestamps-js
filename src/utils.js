@@ -7,7 +7,7 @@
  * @license LPGL3
  */
 
-const crypto = require('crypto');
+const crypto = require('crypto-browserify');
 const fs = require('fs');
 
 /**
