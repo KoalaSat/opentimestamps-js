@@ -16,7 +16,6 @@ const Calendar = require('./calendar.js');
 const Notary = require('./notary.js');
 const Insight = require('./insight.js');
 const Merkle = require('./merkle.js');
-const Bitcoin = require('./bitcoin.js');
 
 
 module.exports = {
@@ -349,86 +348,30 @@ module.exports = {
             // console.log('PendingAttestation: pass ');
           } else if (attestation instanceof Notary.BitcoinBlockHeaderAttestation) {
             found = true;
+            if (!this.insightUrls.length) {
+              console.error('OTS Insight not configured! Use config() function to configure an OTS insight');
+              return reject('No OTS Insight');
+            }
+            const insight = new Insight.MultiInsight(this.insightUrls);
+            insight.blockhash(attestation.height).then(blockHash => {
+              console.log('Lite-client verification, assuming block ' + blockHash + ' is valid');
+              insight.block(blockHash).then(blockInfo => {
+                const merkle = Utils.hexToBytes(blockInfo.merkleroot);
+                const message = msg.reverse();
 
-            // Check for local bitcoin configuration
-            Bitcoin.BitcoinNode.useRemoteRpc(this.rpcConfig)
-            .then(properties => {
-              const bitcoin = new Bitcoin.BitcoinNode(properties);
-              bitcoin.getBlockHeader(attestation.height).then(blockHeader => {
-                const merkle = Utils.hexToBytes(blockHeader.getMerkleroot());
-                const message = msg.reverse();
                 // One Bitcoin attestation is enought
                 if (Utils.arrEq(merkle, message)) {
-                  resolve(blockHeader.time);
+                  resolve(blockInfo.time);
                 } else {
                   resolve();
                 }
-              }).catch(err => {
-                console.error('Error: ' + err);
-                resolve();
-              });
-            })
-            .catch(()=>{
-              return Bitcoin.BitcoinNode.readBitcoinConf();
-            })
-            .then(properties => {
-              const bitcoin = new Bitcoin.BitcoinNode(properties);
-              bitcoin.getBlockHeader(attestation.height).then(blockHeader => {
-                const merkle = Utils.hexToBytes(blockHeader.getMerkleroot());
-                const message = msg.reverse();
-                // One Bitcoin attestation is enought
-                if (Utils.arrEq(merkle, message)) {
-                  resolve(blockHeader.time);
-                } else {
-                  resolve();
-                }
-              }).catch(err => {
-                console.error('Error: ' + err);
-                resolve();
-              });
-            }).catch(() => {
-              const bitcoin = new Bitcoin.BitcoinNode(properties);
-              bitcoin.getBlockHeader(attestation.height).then(blockHeader => {
-                const merkle = Utils.hexToBytes(blockHeader.getMerkleroot());
-                const message = msg.reverse();
-                // One Bitcoin attestation is enought
-                if (Utils.arrEq(merkle, message)) {
-                  resolve(blockHeader.time);
-                } else {
-                  resolve();
-                }
-              }).catch(err => {
-                console.error('Error: ' + err);
-                resolve();
-              });
-            }).catch(() => {
-              // There is no local node available
-              // Request to insight
-              if (!this.insightUrls.length) {
-                console.error('OTS Insight not configured! Use config() function to configure an OTS insight');
-                return reject('No OTS Insight');
-              }
-              const insight = new Insight.MultiInsight(this.insightUrls);
-              insight.blockhash(attestation.height).then(blockHash => {
-                console.log('Lite-client verification, assuming block ' + blockHash + ' is valid');
-                insight.block(blockHash).then(blockInfo => {
-                  const merkle = Utils.hexToBytes(blockInfo.merkleroot);
-                  const message = msg.reverse();
-
-                  // One Bitcoin attestation is enought
-                  if (Utils.arrEq(merkle, message)) {
-                    resolve(blockInfo.time);
-                  } else {
-                    resolve();
-                  }
-                }).catch(err => {
-                  console.error('Error: ' + err);
-                  reject(err);
-                });
               }).catch(err => {
                 console.error('Error: ' + err);
                 reject(err);
               });
+            }).catch(err => {
+              console.error('Error: ' + err);
+              reject(err);
             });
           }
         }
